@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cosmic Quiz — Host</title>
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,7 +97,18 @@ p.tagline { color: var(--muted); font-size: 1.1rem; }
   color: var(--gold); text-shadow: 0 0 30px rgba(255,209,102,.4);
 }
 .join-url { font-size: .9rem; color: var(--sky); background: rgba(72,219,251,.1); padding: 8px 16px; border-radius: 8px; }
-.qr-placeholder { width: 120px; height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+.qr-wrap {
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(255,255,255,.15);
+}
+.qr-wrap canvas, .qr-wrap img { border-radius: 6px; }
 
 .players-panel {
   background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
@@ -256,11 +268,13 @@ p.tagline { color: var(--muted); font-size: 1.1rem; }
 <div class="screen" id="lobbyScreen">
   <div class="lobby-layout">
     <div class="join-panel">
-      <div class="join-label">Players join at</div>
+      <div class="join-label">Scan to join</div>
+      <div class="qr-wrap" id="qrWrap"><div id="qrCode"></div></div>
+      <div class="join-label" style="margin-top:4px">or visit</div>
       <div class="join-url" id="joinUrl">—</div>
       <div class="join-label" style="margin-top:8px">Room Code</div>
       <div class="join-code" id="lobbyCode">——</div>
-      <div style="color:var(--muted);font-size:.9rem">Ask players to open the URL and enter this code</div>
+      <div style="color:var(--muted);font-size:.85rem;max-width:280px">Scan the QR code or open the URL and type the room code</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:16px">
       <div class="players-panel">
@@ -409,9 +423,22 @@ document.getElementById('playAgainBtn').addEventListener('click', () => {
 // ─── Socket Events ───────────────────────────────────────────
 socket.on('room-created', ({ code }) => {
   roomCode = code;
-  const url = `${location.origin}/player.html`;
+  const playerUrl = `${location.origin}/player.html?code=${code}`;
   document.getElementById('lobbyCode').textContent = code;
-  document.getElementById('joinUrl').textContent = url;
+  document.getElementById('joinUrl').textContent = location.origin + '/player.html';
+
+  // Generate QR code linking directly to player page with code pre-filled
+  const qrContainer = document.getElementById('qrCode');
+  qrContainer.innerHTML = '';
+  new QRCode(qrContainer, {
+    text: playerUrl,
+    width: 136,
+    height: 136,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
   show('lobbyScreen');
 });
 
