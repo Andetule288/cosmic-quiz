@@ -292,8 +292,8 @@ io.on('connection', (socket) => {
   socket.on('force-next', ({ code }) => {
     const room = rooms[code];
     if (!room || room.hostId !== socket.id) return;
+    clearTimeout(room.questionTimer); // Always clear any pending timer first
     if (room.phase === 'question') {
-      clearTimeout(room.questionTimer);
       endQuestion(code);
     } else if (room.phase === 'reveal') {
       advanceGame(code);
@@ -438,8 +438,7 @@ function endQuestion(code) {
     results
   });
 
-  // Auto-advance after 6 seconds
-  room.questionTimer = setTimeout(() => advanceGame(code), 6000);
+  // Host controls when to advance — no auto-advance timer here
 }
 
 function advanceGame(code) {
