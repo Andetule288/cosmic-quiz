@@ -693,20 +693,21 @@ socket.on('game-over', ({ leaderboard }) => {
   launchConfetti();
 
   const top3 = leaderboard.slice(0, 3);
-  const order = [1, 0, 2]; // silver, gold, bronze
-  const heights = ['silver', 'gold', 'bronze'];
-  const labels = ['🥈', '🥇', '🥉'];
+  // Podium visual order: 2nd (silver) on left, 1st (gold) in centre, 3rd (bronze) on right
+  const visualOrder = [1, 0, 2]; // indices into top3 by rank
+  const heightClass = ['gold', 'silver', 'bronze']; // indexed by rank
+  const medalLabel  = ['🥇', '🥈', '🥉'];           // indexed by rank
 
   const podium = document.getElementById('podium');
-  podium.innerHTML = order.map(i => {
-    const p = top3[i];
+  podium.innerHTML = visualOrder.map(rank => {
+    const p = top3[rank];
     if (!p) return '';
     return `
       <div class="podium-col">
         <div class="p-av">${p.avatar}</div>
         <div class="p-name">${escHtml(p.name)}</div>
         <div class="p-score">${p.score} pts</div>
-        <div class="p-block ${heights[i]}">${labels[i]}</div>
+        <div class="p-block ${heightClass[rank]}">${medalLabel[rank]}</div>
       </div>
     `;
   }).join('');
