@@ -261,7 +261,6 @@ io.on('connection', (socket) => {
     const room = rooms[code];
     if (!room) { socket.emit('join-error', 'Room not found.'); return; }
     if (room.phase !== 'lobby') { socket.emit('join-error', 'Game already started.'); return; }
-    if (Object.keys(room.players).length >= 50) { socket.emit('join-error', 'Room is full.'); return; }
 
     room.players[socket.id] = { name: name.trim().slice(0, 20) || 'Explorer', score: 0, avatar: avatar || '🚀', answered: false };
     socket.join(code);
